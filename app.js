@@ -43,57 +43,85 @@ app.get('/', (req, res) => {
 <meta charset="UTF-8">
 <title>Lộc Xuân May Mắn</title>
 <style>
+* { box-sizing: border-box; }
+
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: linear-gradient(135deg, #c62828, #f9a825);
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: radial-gradient(circle at top, #ffeb3b, #c62828);
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
 }
+
 .box {
-  background: #fff8e1;
-  padding: 32px;
-  width: 360px;
-  border-radius: 18px;
-  box-shadow: 0 15px 35px rgba(0,0,0,0.35);
+  background: linear-gradient(180deg, #fffde7, #fff8e1);
+  padding: 34px;
+  width: 380px;
+  border-radius: 20px;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.4);
   border: 4px solid #fbc02d;
+  position: relative;
 }
+
+.box::before {
+  content: "🧧";
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 38px;
+  background: #c62828;
+  padding: 6px 14px;
+  border-radius: 50%;
+  border: 3px solid #fbc02d;
+}
+
 h2 {
   text-align: center;
-  color: #c62828;
-  margin-bottom: 20px;
+  color: #b71c1c;
+  margin-bottom: 22px;
+  letter-spacing: 1px;
 }
+
 label {
-  font-weight: bold;
-  margin-top: 12px;
+  font-weight: 600;
+  margin-top: 14px;
   display: block;
+  color: #5d4037;
 }
+
 input {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   margin-top: 6px;
-  border-radius: 6px;
+  border-radius: 10px;
   border: 1px solid #ccc;
   font-size: 15px;
 }
+
 button {
-  margin-top: 22px;
+  margin-top: 24px;
   width: 100%;
-  padding: 12px;
-  background: #d32f2f;
+  padding: 14px;
+  background: linear-gradient(135deg, #d32f2f, #b71c1c);
   color: #ffeb3b;
   border: none;
-  border-radius: 10px;
+  border-radius: 14px;
   font-size: 17px;
+  font-weight: bold;
   cursor: pointer;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.25);
 }
+
 button:hover {
-  background: #b71c1c;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.35);
 }
+
 .note {
-  margin-top: 16px;
+  margin-top: 18px;
   text-align: center;
   font-size: 13px;
   color: #6d4c41;
@@ -102,7 +130,7 @@ button:hover {
 </head>
 <body>
 <div class="box">
-  <h2>🧧 LỘC XUÂN MAY MẮN</h2>
+  <h2>LỘC XUÂN MAY MẮN</h2>
   <form method="POST" action="/submit">
     <label>Tên của bạn</label>
     <input name="name" required>
@@ -141,34 +169,47 @@ app.get('/admin', (req, res) => {
 <title>Admin</title>
 <style>
 body {
-  background: linear-gradient(135deg, #8e0000, #ffb300);
+  background: linear-gradient(135deg, #b71c1c, #ffca28);
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: Arial;
+  font-family: 'Segoe UI', Arial;
 }
+
 .box {
-  background: #fff8e1;
-  padding: 30px;
-  border-radius: 16px;
-  width: 320px;
-  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  background: #fffde7;
+  padding: 32px;
+  border-radius: 18px;
+  width: 340px;
+  box-shadow: 0 14px 36px rgba(0,0,0,.4);
+  border: 3px solid #fbc02d;
 }
+
 h2 {
   text-align: center;
-  color: #c62828;
+  color: #b71c1c;
+  margin-bottom: 18px;
 }
-input, button {
+
+input {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   margin-top: 12px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
 }
+
 button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 18px;
   background: #d32f2f;
   color: #ffeb3b;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: bold;
   cursor: pointer;
 }
 </style>
@@ -214,34 +255,48 @@ app.get('/admin/dashboard', (req, res) => {
 <title>Dashboard</title>
 <style>
 body {
-  font-family: Arial;
-  background: #fff3e0;
+  font-family: 'Segoe UI', Arial;
+  background: linear-gradient(180deg, #fff3e0, #ffe0b2);
   padding: 30px;
 }
+
 h2 {
-  color: #c62828;
+  color: #b71c1c;
+  text-align: center;
 }
+
 table {
   border-collapse: collapse;
   width: 100%;
-  margin-top: 20px;
+  margin-top: 24px;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
 }
+
 th, td {
-  border: 1px solid #ccc;
-  padding: 10px;
+  padding: 12px;
   text-align: center;
 }
+
 th {
   background: #fbc02d;
 }
+
+tr:nth-child(even) {
+  background: #fffde7;
+}
+
 a {
   display: inline-block;
-  margin-top: 20px;
-  padding: 10px 16px;
+  margin-top: 24px;
+  padding: 12px 18px;
   background: #d32f2f;
   color: #ffeb3b;
   text-decoration: none;
-  border-radius: 8px;
+  border-radius: 10px;
+  font-weight: bold;
 }
 </style>
 </head>
