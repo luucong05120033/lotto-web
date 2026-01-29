@@ -39,8 +39,6 @@ db.serialize(() => {
 
 // ================= MIDDLEWARE =================
 app.use(bodyParser.urlencoded({ extended: true }));
-app.set('trust proxy', 1);
-
 app.use(session({
   secret: 'tet-lucky',
   resave: false,
@@ -84,12 +82,7 @@ body{
   text-align:center;
 }
 h2{color:#c62828;margin-bottom:20px}
-label{
-  display:block;
-  text-align:left;
-  font-weight:bold;
-  margin-top:14px;
-}
+label{display:block;text-align:left;font-weight:bold;margin-top:14px}
 input{
   width:100%;
   padding:11px;
@@ -115,11 +108,7 @@ button{
   color:#b71c1c;
   font-weight:bold;
 }
-.note{
-  margin-top:18px;
-  font-size:13px;
-  color:#5d4037;
-}
+.note{margin-top:18px;font-size:13px;color:#5d4037}
 </style>
 </head>
 <body>
@@ -158,7 +147,6 @@ Số <b>nhỏ nhất & duy nhất</b> sẽ nhận lộc 🍀
 app.post('/submit', (req, res) => {
   isLocked(locked => {
     if (locked) return res.redirect('/');
-
     const { name, number } = req.body;
     db.run(
       'INSERT INTO submissions (name, number) VALUES (?, ?)',
@@ -189,19 +177,14 @@ body{
 }
 .box{
   background:#fff8e1;
-  width:400px;
-  padding:38px;
+  width:420px;
+  padding:40px;
   border-radius:22px;
   border:4px solid #fbc02d;
   text-align:center;
   box-shadow:0 18px 40px rgba(0,0,0,.35);
 }
 h2{color:#c62828}
-p{
-  margin-top:14px;
-  font-size:16px;
-  color:#5d4037;
-}
 a{
   display:inline-block;
   margin-top:26px;
@@ -215,14 +198,15 @@ a{
 </head>
 <body>
 <div class="box">
-<h2>🧧 CẢM ƠN ${name}! 🧧</h2>
+<h2>🧧 Cảm ơn ${name} đã gửi số 🧧</h2>
 
-<p>🎁 Bao lì xì đã được gửi 🎁</p>
+<p>(🎁 Bao lì xì 🎁)</p>
 
 <p>
 🌸 Chúc Bạn Năm Mới 🌸<br>
+(🌼🌺)<br>
 <b>An Khang – Thịnh Vượng – Cát Tường</b><br>
-🌼🌺
+(🌺🌼)
 </p>
 
 <a href="/">⬅ Quay lại màn hình chính</a>
@@ -251,10 +235,9 @@ app.post('/admin/login', (req, res) => {
   } else res.send('Sai tài khoản');
 });
 
-// ================= DASHBOARD (GIỮ NGUYÊN LOGIC) =================
+// ================= DASHBOARD (TRANG TRÍ ĐẸP) =================
 app.get('/admin/dashboard', (req, res) => {
   if (!req.session.admin) return res.redirect('/admin');
-
   const q = req.query.q || '';
 
   db.all(
@@ -264,29 +247,80 @@ app.get('/admin/dashboard', (req, res) => {
     [`%${q}%`, `%${q}%`],
     (err, rows) => {
       isLocked(locked => {
-        let html = `
-<h2>📊 BẢNG KẾT QUẢ</h2>
+        res.send(`
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Bảng Kết Quả</title>
+<style>
+body{
+  font-family:Arial;
+  background:linear-gradient(135deg,#b71c1c,#f9a825);
+  padding:40px;
+}
+.box{
+  background:#fff8e1;
+  border-radius:20px;
+  padding:30px;
+  border:4px solid #fbc02d;
+}
+h2{text-align:center;color:#c62828}
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+th,td{
+  border:1px solid #fbc02d;
+  padding:10px;
+  text-align:center;
+}
+th{background:#ffe082}
+form{margin-top:15px;text-align:center}
+button{
+  padding:10px 18px;
+  border:none;
+  border-radius:10px;
+  background:#d32f2f;
+  color:#ffeb3b;
+  cursor:pointer;
+}
+input{
+  padding:8px;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+.actions{text-align:center;margin-top:20px}
+</style>
+</head>
+<body>
+
+<div class="box">
+<h2>📊 BẢNG KẾT QUẢ – CON SỐ MAY MẮN 🎊</h2>
 
 <form>
-<input name="q" value="${q}" placeholder="Lọc tên / số">
+<input name="q" value="${q}" placeholder="🔍 Lọc tên hoặc số">
 <button>Lọc</button>
-</form><br>
+</form>
 
 <form method="POST" action="/admin/toggle-lock">
 <button>${locked ? '🔓 MỞ GỬI SỐ' : '🔒 KHÓA GỬI SỐ'}</button>
 </form>
 
-<table border="1" cellpadding="6">
+<table>
 <tr><th>Tên</th><th>Số</th></tr>
-`;
-        rows.forEach(r => {
-          html += `<tr><td>${r.name}</td><td>${r.number}</td></tr>`;
-        });
-        html += `
-</table><br>
-<a href="/admin/reset">🗑 RESET</a>
-`;
-        res.send(html);
+${rows.map(r => `<tr><td>${r.name}</td><td>${r.number}</td></tr>`).join('')}
+</table>
+
+<div class="actions">
+<a href="/admin/reset">🗑 RESET DỮ LIỆU</a>
+</div>
+</div>
+
+</body>
+</html>
+`);
       });
     }
   );
@@ -294,17 +328,14 @@ app.get('/admin/dashboard', (req, res) => {
 
 // ================= LOCK =================
 app.post('/admin/toggle-lock', (req, res) => {
-  db.get(
-    "SELECT value FROM settings WHERE key='lock'",
-    (err, row) => {
-      const newVal = row.value === '1' ? '0' : '1';
-      db.run(
-        "UPDATE settings SET value=? WHERE key='lock'",
-        [newVal],
-        () => res.redirect('/admin/dashboard')
-      );
-    }
-  );
+  db.get("SELECT value FROM settings WHERE key='lock'", (err, row) => {
+    const newVal = row.value === '1' ? '0' : '1';
+    db.run(
+      "UPDATE settings SET value=? WHERE key='lock'",
+      [newVal],
+      () => res.redirect('/admin/dashboard')
+    );
+  });
 });
 
 // ================= RESET =================
