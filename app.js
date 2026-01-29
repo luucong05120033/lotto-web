@@ -216,26 +216,70 @@ a{
 `);
 });
 
-// ================= ADMIN LOGIN (GIỮ NGUYÊN) =================
+// ================= ADMIN LOGIN (TRANG TRÍ) =================
 app.get('/admin', (req, res) => {
   res.send(`
-<form method="POST" action="/admin/login" style="width:300px;margin:120px auto">
-<h3>ADMIN</h3>
-<input name="username" placeholder="User"><br><br>
-<input type="password" name="password" placeholder="Pass"><br><br>
-<button>Login</button>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Admin Login</title>
+<style>
+body{
+  margin:0;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-family:Arial;
+  background:linear-gradient(135deg,#8e0000,#ffb300);
+}
+.box{
+  background:#fff8e1;
+  padding:40px;
+  width:320px;
+  border-radius:20px;
+  border:4px solid #fbc02d;
+  box-shadow:0 18px 40px rgba(0,0,0,.35);
+  text-align:center;
+}
+h3{color:#c62828;margin-bottom:20px}
+input{
+  width:100%;
+  padding:12px;
+  margin-top:12px;
+  border-radius:10px;
+  border:1px solid #ccc;
+}
+button{
+  width:100%;
+  margin-top:20px;
+  padding:14px;
+  border:none;
+  border-radius:14px;
+  background:#d32f2f;
+  color:#ffeb3b;
+  font-size:16px;
+  cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<div class="box">
+<h3>🔐 ADMIN LOGIN</h3>
+<form method="POST" action="/admin/login">
+<input name="username" placeholder="Username" required>
+<input type="password" name="password" placeholder="Password" required>
+<button>Đăng nhập</button>
 </form>
+</div>
+
+</body>
+</html>
 `);
 });
-
-app.post('/admin/login', (req, res) => {
-  if (req.body.username === ADMIN_USER && req.body.password === ADMIN_PASS) {
-    req.session.admin = true;
-    res.redirect('/admin/dashboard');
-  } else res.send('Sai tài khoản');
-});
-
-// ================= DASHBOARD (TRANG TRÍ ĐẸP) =================
+// ================= DASHBOARD (TRANG TRÍ CHUẨN) =================
 app.get('/admin/dashboard', (req, res) => {
   if (!req.session.admin) return res.redirect('/admin');
   const q = req.query.q || '';
@@ -256,14 +300,15 @@ app.get('/admin/dashboard', (req, res) => {
 <style>
 body{
   font-family:Arial;
-  background:linear-gradient(135deg,#b71c1c,#f9a825);
+  background:linear-gradient(135deg,#8e0000,#ffb300);
   padding:40px;
 }
 .box{
   background:#fff8e1;
-  border-radius:20px;
+  border-radius:22px;
   padding:30px;
   border:4px solid #fbc02d;
+  box-shadow:0 18px 40px rgba(0,0,0,.35);
 }
 h2{text-align:center;color:#c62828}
 table{
@@ -273,11 +318,16 @@ table{
 }
 th,td{
   border:1px solid #fbc02d;
-  padding:10px;
+  padding:12px;
   text-align:center;
 }
 th{background:#ffe082}
-form{margin-top:15px;text-align:center}
+form{text-align:center;margin-top:15px}
+input{
+  padding:8px;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
 button{
   padding:10px 18px;
   border:none;
@@ -286,12 +336,15 @@ button{
   color:#ffeb3b;
   cursor:pointer;
 }
-input{
-  padding:8px;
-  border-radius:8px;
-  border:1px solid #ccc;
+.actions{
+  text-align:center;
+  margin-top:20px;
 }
-.actions{text-align:center;margin-top:20px}
+.actions a{
+  color:#c62828;
+  font-weight:bold;
+  text-decoration:none;
+}
 </style>
 </head>
 <body>
@@ -323,26 +376,6 @@ ${rows.map(r => `<tr><td>${r.name}</td><td>${r.number}</td></tr>`).join('')}
 `);
       });
     }
-  );
-});
-
-// ================= LOCK =================
-app.post('/admin/toggle-lock', (req, res) => {
-  db.get("SELECT value FROM settings WHERE key='lock'", (err, row) => {
-    const newVal = row.value === '1' ? '0' : '1';
-    db.run(
-      "UPDATE settings SET value=? WHERE key='lock'",
-      [newVal],
-      () => res.redirect('/admin/dashboard')
-    );
-  });
-});
-
-// ================= RESET =================
-app.get('/admin/reset', (req, res) => {
-  if (!req.session.admin) return res.redirect('/admin');
-  db.run('DELETE FROM submissions', () =>
-    res.redirect('/admin/dashboard')
   );
 });
 
