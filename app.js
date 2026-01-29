@@ -180,8 +180,8 @@ a {
 <body>
 <div class="box">
   <h2>🎊 GỬI LỘC THÀNH CÔNG!</h2>
-  <p>Cảm ơn bạn đã tham gia <b>Lộc Xuân May Mắn</b> 🌸</p>
-  <p>Chúc bạn năm mới <b>An Khang – Thịnh Vượng – Vạn Sự Như Ý</b> 🍀</p>
+  <p>Cảm ơn bạn đã tham gia <br> <b>Lộc Xuân May Mắn</b> 🌸</p>
+  <p>Chúc bạn năm mới <br> <b>An Khang – Thịnh Vượng – Vạn Sự Như Ý</b> 🍀</p>
   <a href="/">🔁 Quay lại trang chính</a>
 </div>
 </body>
