@@ -7,7 +7,7 @@ const sqlite3 = require('sqlite3').verbose();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ================= ADMIN ACCOUNT =================
+// ================= ADMIN =================
 const ADMIN_USER = 'admin';
 const ADMIN_PASS = '123456';
 
@@ -32,20 +32,17 @@ db.serialize(() => {
   `);
 
   db.run(`
-    INSERT OR IGNORE INTO settings (key, value)
-    VALUES ('lock', '0')
+    INSERT OR IGNORE INTO settings (key,value)
+    VALUES ('lock','0')
   `);
 });
 
 // ================= MIDDLEWARE =================
 app.use(bodyParser.urlencoded({ extended: true }));
-app.set('trust proxy', 1);
-
 app.use(session({
   secret: 'tet-lotto',
   resave: false,
-  saveUninitialized: true,
-  cookie: { secure: false }
+  saveUninitialized: true
 }));
 
 // ================= HELPER =================
@@ -56,7 +53,7 @@ function isLocked(cb) {
   );
 }
 
-// ================= USER FORM =================
+// ================= USER PAGE =================
 app.get('/', (req, res) => {
   isLocked(locked => {
     res.send(`
@@ -68,51 +65,50 @@ app.get('/', (req, res) => {
 <style>
 body{
   margin:0;
-  font-family:Arial;
-  background:linear-gradient(135deg,#c62828,#f9a825);
   height:100vh;
   display:flex;
-  align-items:center;
   justify-content:center;
+  align-items:center;
+  background:linear-gradient(135deg,#b71c1c,#fbc02d);
+  font-family:Arial;
 }
-.box{
-  background:#fff8e1;
-  padding:30px;
+.card{
   width:360px;
-  border-radius:20px;
+  background:#fff8e1;
+  border-radius:22px;
+  padding:30px;
   border:4px solid #fbc02d;
-  box-shadow:0 15px 40px rgba(0,0,0,.35);
+  box-shadow:0 20px 45px rgba(0,0,0,.35);
   text-align:center;
 }
-h2{color:#c62828;margin-bottom:10px}
+h2{color:#c62828}
 input,button{
   width:100%;
   padding:12px;
   margin-top:12px;
   border-radius:10px;
   border:1px solid #ccc;
-  font-size:16px;
 }
 button{
   background:#d32f2f;
   color:#ffeb3b;
+  font-size:16px;
   border:none;
-  cursor:pointer;
 }
 .lock{
-  color:red;
+  color:#b71c1c;
   font-weight:bold;
 }
 </style>
 </head>
 <body>
 
-<div class="box">
+<div class="card">
 <h2>🧧 LÔ TÔ MAY MẮN</h2>
-<p>Nhập tên & con số may mắn của bạn</p>
+<p>Nhập tên & số của bạn</p>
 
 ${locked ? `
-<p class="lock">⛔ Đã khóa gửi số</p>
+<p class="lock">🔒 ĐÃ KHÓA GỬI SỐ</p>
 ` : `
 <form method="POST" action="/submit">
 <input name="name" placeholder="Tên của bạn" required>
@@ -120,8 +116,8 @@ ${locked ? `
 <button>🎉 GỬI SỐ</button>
 </form>
 `}
-
 </div>
+
 </body>
 </html>
 `);
@@ -138,7 +134,7 @@ app.post('/submit', (req, res) => {
     }
 
     db.run(
-      "INSERT INTO submissions (name, number) VALUES (?, ?)",
+      "INSERT INTO submissions (name, number) VALUES (?,?)",
       [name, number],
       () => {
         res.send(`
@@ -149,17 +145,17 @@ app.post('/submit', (req, res) => {
 <title>Cảm ơn</title>
 <style>
 body{
-  background:linear-gradient(135deg,#d32f2f,#fbc02d);
   height:100vh;
   display:flex;
-  align-items:center;
   justify-content:center;
+  align-items:center;
+  background:linear-gradient(135deg,#c62828,#fbc02d);
   font-family:Arial;
 }
 .box{
   background:white;
   padding:40px;
-  border-radius:20px;
+  border-radius:22px;
   text-align:center;
   box-shadow:0 20px 40px rgba(0,0,0,.35);
 }
@@ -171,7 +167,7 @@ h2{color:#c62828}
 <div class="box">
 <h2>🎉 CẢM ƠN BẠN!</h2>
 <p><b>${name}</b> đã gửi số <b>${number}</b></p>
-<p>🧧 Chúc bạn năm mới<br>SỨC KHỎE – MAY MẮN – PHÁT TÀI 🧧</p>
+<p>🧧 Chúc bạn năm mới<br>AN KHANG – MAY MẮN – PHÁT TÀI 🧧</p>
 </div>
 
 </body>
@@ -192,20 +188,23 @@ app.get('/admin', (req, res) => {
 <title>Admin Login</title>
 <style>
 body{
-  background:linear-gradient(135deg,#c62828,#f9a825);
+  margin:0;
   height:100vh;
   display:flex;
-  align-items:center;
   justify-content:center;
+  align-items:center;
+  background:linear-gradient(135deg,#880e4f,#fbc02d);
   font-family:Arial;
 }
-.box{
-  background:#fff8e1;
-  padding:30px;
+.card{
   width:320px;
-  border-radius:20px;
+  background:#fff8e1;
+  border-radius:22px;
+  padding:30px;
   border:4px solid #fbc02d;
+  box-shadow:0 18px 40px rgba(0,0,0,.4);
 }
+h2{text-align:center;color:#c62828}
 input,button{
   width:100%;
   padding:12px;
@@ -214,21 +213,23 @@ input,button{
   border:1px solid #ccc;
 }
 button{
-  background:#d32f2f;
+  background:#c62828;
   color:#ffeb3b;
   border:none;
 }
 </style>
 </head>
 <body>
-<div class="box">
-<h2 style="text-align:center;color:#c62828">🔐 ADMIN</h2>
+
+<div class="card">
+<h2>🔐 ADMIN</h2>
 <form method="POST" action="/admin/login">
 <input name="username" placeholder="Tài khoản" required>
 <input type="password" name="password" placeholder="Mật khẩu" required>
 <button>Đăng nhập</button>
 </form>
 </div>
+
 </body>
 </html>
 `);
@@ -257,12 +258,11 @@ app.get('/admin/dashboard', (req, res) => {
     (err, rows) => {
 
       isLocked(locked => {
-        let list = rows.map(r => `
+        const list = rows.map(r => `
 <tr>
 <td>${r.name}</td>
 <td><b>${r.number}</b></td>
-</tr>
-`).join('');
+</tr>`).join('');
 
         res.send(`
 <!DOCTYPE html>
@@ -271,30 +271,43 @@ app.get('/admin/dashboard', (req, res) => {
 <meta charset="UTF-8">
 <title>Dashboard</title>
 <style>
-body{font-family:Arial;background:#f5f5f5;padding:30px}
-.box{
-  background:white;
-  max-width:700px;
-  margin:auto;
-  padding:25px;
-  border-radius:18px;
-  box-shadow:0 15px 40px rgba(0,0,0,.25);
+body{
+  font-family:Arial;
+  background:#f3f3f3;
+  padding:30px;
 }
-.controls{display:flex;gap:10px;flex-wrap:wrap}
-input{padding:10px;border-radius:8px;border:1px solid #ccc}
+.panel{
+  max-width:750px;
+  margin:auto;
+  background:white;
+  padding:25px;
+  border-radius:22px;
+  box-shadow:0 18px 40px rgba(0,0,0,.3);
+}
+h2{text-align:center;color:#c62828}
+.controls{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:20px;
+}
+input{
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
 button,a{
   padding:10px 14px;
   border-radius:8px;
   border:none;
+  background:#c62828;
   color:white;
-  background:#d32f2f;
   text-decoration:none;
 }
-.lock{background:${locked ? '#388e3c' : '#b71c1c'}}
+.lock{background:${locked ? '#2e7d32' : '#b71c1c'}}
 .reset{background:#6d4c41}
 table{
   width:100%;
-  margin-top:15px;
   border-collapse:collapse;
 }
 th,td{
@@ -307,20 +320,22 @@ th{background:#fbc02d}
 </head>
 <body>
 
-<div class="box">
-<h2 style="text-align:center;color:#c62828">📊 KẾT QUẢ</h2>
+<div class="panel">
+<h2>📊 BẢNG KẾT QUẢ</h2>
 
 <div class="controls">
 <form>
 <input name="q" placeholder="Lọc tên / số" value="${q}">
-<button>Lọc</button>
+<button>🔍 Lọc</button>
 </form>
 
 <form method="POST" action="/admin/toggle-lock">
-<button class="lock">${locked ? '🔓 MỞ GỬI SỐ' : '🔒 KHÓA GỬI SỐ'}</button>
+<button class="lock">
+${locked ? '🔓 MỞ GỬI SỐ' : '🔒 KHÓA GỬI SỐ'}
+</button>
 </form>
 
-<a class="reset" href="/admin/reset">🗑 RESET</a>
+<a class="reset" href="/admin/reset">♻ RESET</a>
 </div>
 
 <table>
@@ -329,6 +344,7 @@ ${list || '<tr><td colspan="2">Chưa có dữ liệu</td></tr>'}
 </table>
 
 </div>
+
 </body>
 </html>
 `);
@@ -357,5 +373,5 @@ app.get('/admin/reset', (req, res) => {
 
 // ================= START =================
 app.listen(PORT, () => {
-  console.log('🧧 Server chạy tại port ' + PORT);
+  console.log('🧧 Server chạy tại http://localhost:' + PORT);
 });
