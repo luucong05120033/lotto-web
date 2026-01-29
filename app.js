@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 3000;
 const ADMIN_USER = 'admin';
 const ADMIN_PASS = '123456';
 
-// ================= DATABASE =================
+// ================= DATABASE (Render OK) =================
 const db = new sqlite3.Database('/tmp/data.db');
 
 db.serialize(() => {
@@ -19,8 +19,7 @@ db.serialize(() => {
     CREATE TABLE IF NOT EXISTS submissions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT,
-      number INTEGER,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      number INTEGER
     )
   `);
 
@@ -31,10 +30,7 @@ db.serialize(() => {
     )
   `);
 
-  db.run(`
-    INSERT OR IGNORE INTO settings (key, value)
-    VALUES ('lock', '0')
-  `);
+  db.run(`INSERT OR IGNORE INTO settings VALUES ('lock','0')`);
 });
 
 // ================= MIDDLEWARE =================
@@ -47,73 +43,88 @@ app.use(session({
 
 // ================= HELPER =================
 function isLocked(cb) {
-  db.get(
-    "SELECT value FROM settings WHERE key='lock'",
-    (err, row) => cb(row && row.value === '1')
-  );
+  db.get("SELECT value FROM settings WHERE key='lock'", (e, r) => {
+    cb(r && r.value === '1');
+  });
 }
 
-// ================= TRANG NGƯỜI CHƠI =================
-app.get('/', (req, res) => {
-  isLocked(locked => {
-    res.send(`
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-<meta charset="UTF-8">
-<title>Con Số May Mắn</title>
+// ================= CSS CHUNG =================
+const baseCSS = `
 <style>
 body{
   margin:0;
   font-family:Arial;
   background:linear-gradient(135deg,#b71c1c,#f9a825);
-  height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
+  min-height:100vh;
 }
 .box{
   background:#fff8e1;
-  width:380px;
+  max-width:420px;
+  margin:60px auto;
   padding:35px;
   border-radius:22px;
   border:4px solid #fbc02d;
   box-shadow:0 18px 40px rgba(0,0,0,.35);
-  text-align:center;
 }
-h2{color:#c62828;margin-bottom:20px}
-label{display:block;text-align:left;font-weight:bold;margin-top:14px}
-input{
+h1,h2{color:#c62828;text-align:center}
+input,button{
   width:100%;
-  padding:11px;
-  margin-top:6px;
-  border-radius:8px;
+  padding:12px;
+  margin-top:10px;
+  border-radius:10px;
   border:1px solid #ccc;
 }
 button{
-  margin-top:22px;
-  width:100%;
-  padding:14px;
   background:#d32f2f;
   color:#ffeb3b;
-  border:none;
-  border-radius:14px;
-  font-size:17px;
+  font-size:16px;
   cursor:pointer;
+  border:none;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+th,td{
+  border:1px solid #fbc02d;
+  padding:10px;
+  text-align:center;
+}
+th{background:#ffe082}
+a.btn{
+  display:block;
+  margin-top:20px;
+  text-align:center;
+  padding:12px;
+  background:#d32f2f;
+  color:#ffeb3b;
+  text-decoration:none;
+  border-radius:10px;
 }
 .lock{
   background:#ffebee;
-  padding:16px;
+  padding:18px;
   border-radius:12px;
   color:#b71c1c;
   font-weight:bold;
+  text-align:center;
 }
-.note{margin-top:18px;font-size:13px;color:#5d4037}
 </style>
+`;
+
+// ================= TRANG NGƯỜI CHƠI =================
+app.get('/', (req, res) => {
+  isLocked(locked => {
+    res.send(`
+<!DOCTYPE html><html><head>
+<meta charset="UTF-8">
+<title>Con Số May Mắn</title>
+${baseCSS}
 </head>
 <body>
 <div class="box">
-<h2>🧧 CON SỐ MAY MẮN 🧧</h2>
+<h1>🧧 CON SỐ MAY MẮN 🧧</h1>
 
 ${locked ? `
 <div class="lock">
@@ -123,22 +134,21 @@ Vui lòng chờ BTC công bố kết quả 🎊
 </div>
 ` : `
 <form method="POST" action="/submit">
-<label>Tên của bạn</label>
+<b>Tên của bạn</b>
 <input name="name" required>
 
-<label>Số bạn chọn (1 – 40)</label>
+<b>Số bạn chọn (1–40)</b>
 <input type="number" name="number" min="1" max="40" required>
 
-<button>🎉 GỬI CON SỐ MAY MẮN</button>
+<button>🎉 GỬI SỐ MAY MẮN</button>
 </form>
 `}
 
-<div class="note">
-Số <b>nhỏ nhất & duy nhất</b> sẽ nhận lộc 🍀
+<p style="text-align:center;margin-top:15px">
+🍀 Số <b>nhỏ nhất & duy nhất</b> sẽ trúng lộc 🍀
+</p>
 </div>
-</div>
-</body>
-</html>
+</body></html>
 `);
   });
 });
@@ -149,7 +159,7 @@ app.post('/submit', (req, res) => {
     if (locked) return res.redirect('/');
     const { name, number } = req.body;
     db.run(
-      'INSERT INTO submissions (name, number) VALUES (?, ?)',
+      'INSERT INTO submissions (name, number) VALUES (?,?)',
       [name, number],
       () => res.redirect(`/thanks?name=${encodeURIComponent(name)}`)
     );
@@ -160,200 +170,79 @@ app.post('/submit', (req, res) => {
 app.get('/thanks', (req, res) => {
   const name = req.query.name || 'Bạn';
   res.send(`
-<!DOCTYPE html>
-<html lang="vi">
-<head>
+<!DOCTYPE html><html><head>
 <meta charset="UTF-8">
 <title>Cảm ơn</title>
-<style>
-body{
-  margin:0;
-  font-family:Arial;
-  background:linear-gradient(135deg,#b71c1c,#f9a825);
-  height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
-.box{
-  background:#fff8e1;
-  width:420px;
-  padding:40px;
-  border-radius:22px;
-  border:4px solid #fbc02d;
-  text-align:center;
-  box-shadow:0 18px 40px rgba(0,0,0,.35);
-}
-h2{color:#c62828}
-a{
-  display:inline-block;
-  margin-top:26px;
-  padding:14px 24px;
-  background:#d32f2f;
-  color:#ffeb3b;
-  text-decoration:none;
-  border-radius:14px;
-}
-</style>
+${baseCSS}
 </head>
 <body>
 <div class="box">
 <h2>🧧 Cảm ơn ${name} đã gửi số 🧧</h2>
 
-<p>(🎁 Bao lì xì 🎁)</p>
-
-<p>
+<p style="text-align:center">
+🎁 Bao lì xì 🎁<br><br>
 🌸 Chúc Bạn Năm Mới 🌸<br>
-(🌼🌺)<br>
-<b>An Khang – Thịnh Vượng – Cát Tường</b><br>
-(🌺🌼)
+🌼🌺 An Khang – Thịnh Vượng – Cát Tường 🌺🌼
 </p>
 
-<a href="/">⬅ Quay lại màn hình chính</a>
+<a class="btn" href="/">⬅ Quay lại</a>
 </div>
-</body>
-</html>
+</body></html>
 `);
 });
 
-// ================= ADMIN LOGIN (TRANG TRÍ) =================
+// ================= ADMIN LOGIN =================
 app.get('/admin', (req, res) => {
   res.send(`
-<!DOCTYPE html>
-<html lang="vi">
-<head>
+<!DOCTYPE html><html><head>
 <meta charset="UTF-8">
 <title>Admin Login</title>
-<style>
-body{
-  margin:0;
-  height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-family:Arial;
-  background:linear-gradient(135deg,#8e0000,#ffb300);
-}
-.box{
-  background:#fff8e1;
-  padding:40px;
-  width:320px;
-  border-radius:20px;
-  border:4px solid #fbc02d;
-  box-shadow:0 18px 40px rgba(0,0,0,.35);
-  text-align:center;
-}
-h3{color:#c62828;margin-bottom:20px}
-input{
-  width:100%;
-  padding:12px;
-  margin-top:12px;
-  border-radius:10px;
-  border:1px solid #ccc;
-}
-button{
-  width:100%;
-  margin-top:20px;
-  padding:14px;
-  border:none;
-  border-radius:14px;
-  background:#d32f2f;
-  color:#ffeb3b;
-  font-size:16px;
-  cursor:pointer;
-}
-</style>
+${baseCSS}
 </head>
 <body>
-
 <div class="box">
-<h3>🔐 ADMIN LOGIN</h3>
+<h2>🔐 ADMIN LOGIN</h2>
 <form method="POST" action="/admin/login">
-<input name="username" placeholder="Username" required>
-<input type="password" name="password" placeholder="Password" required>
+<input name="username" placeholder="Username">
+<input type="password" name="password" placeholder="Password">
 <button>Đăng nhập</button>
 </form>
 </div>
-
-</body>
-</html>
+</body></html>
 `);
 });
-// ================= DASHBOARD (TRANG TRÍ CHUẨN) =================
+
+app.post('/admin/login', (req, res) => {
+  if (req.body.username === ADMIN_USER && req.body.password === ADMIN_PASS) {
+    req.session.admin = true;
+    res.redirect('/admin/dashboard');
+  } else {
+    res.send('Sai tài khoản');
+  }
+});
+
+// ================= DASHBOARD =================
 app.get('/admin/dashboard', (req, res) => {
   if (!req.session.admin) return res.redirect('/admin');
-  const q = req.query.q || '';
 
+  const q = req.query.q || '';
   db.all(
-    `SELECT * FROM submissions
-     WHERE name LIKE ? OR number LIKE ?
-     ORDER BY number ASC`,
+    `SELECT * FROM submissions WHERE name LIKE ? OR number LIKE ? ORDER BY number ASC`,
     [`%${q}%`, `%${q}%`],
-    (err, rows) => {
+    (e, rows) => {
       isLocked(locked => {
         res.send(`
-<!DOCTYPE html>
-<html lang="vi">
-<head>
+<!DOCTYPE html><html><head>
 <meta charset="UTF-8">
 <title>Bảng Kết Quả</title>
-<style>
-body{
-  font-family:Arial;
-  background:linear-gradient(135deg,#8e0000,#ffb300);
-  padding:40px;
-}
-.box{
-  background:#fff8e1;
-  border-radius:22px;
-  padding:30px;
-  border:4px solid #fbc02d;
-  box-shadow:0 18px 40px rgba(0,0,0,.35);
-}
-h2{text-align:center;color:#c62828}
-table{
-  width:100%;
-  border-collapse:collapse;
-  margin-top:20px;
-}
-th,td{
-  border:1px solid #fbc02d;
-  padding:12px;
-  text-align:center;
-}
-th{background:#ffe082}
-form{text-align:center;margin-top:15px}
-input{
-  padding:8px;
-  border-radius:8px;
-  border:1px solid #ccc;
-}
-button{
-  padding:10px 18px;
-  border:none;
-  border-radius:10px;
-  background:#d32f2f;
-  color:#ffeb3b;
-  cursor:pointer;
-}
-.actions{
-  text-align:center;
-  margin-top:20px;
-}
-.actions a{
-  color:#c62828;
-  font-weight:bold;
-  text-decoration:none;
-}
-</style>
+${baseCSS}
 </head>
 <body>
-
 <div class="box">
-<h2>📊 BẢNG KẾT QUẢ – CON SỐ MAY MẮN 🎊</h2>
+<h2>📊 BẢNG KẾT QUẢ 🎊</h2>
 
 <form>
-<input name="q" value="${q}" placeholder="🔍 Lọc tên hoặc số">
+<input name="q" placeholder="🔍 Lọc tên / số" value="${q}">
 <button>Lọc</button>
 </form>
 
@@ -366,20 +255,33 @@ button{
 ${rows.map(r => `<tr><td>${r.name}</td><td>${r.number}</td></tr>`).join('')}
 </table>
 
-<div class="actions">
-<a href="/admin/reset">🗑 RESET DỮ LIỆU</a>
+<a class="btn" href="/admin/reset">🗑 RESET</a>
 </div>
-</div>
-
-</body>
-</html>
+</body></html>
 `);
       });
     }
   );
 });
 
+// ================= LOCK & RESET =================
+app.post('/admin/toggle-lock', (req, res) => {
+  db.get("SELECT value FROM settings WHERE key='lock'", (e, r) => {
+    const v = r.value === '1' ? '0' : '1';
+    db.run("UPDATE settings SET value=?", [v], () =>
+      res.redirect('/admin/dashboard')
+    );
+  });
+});
+
+app.get('/admin/reset', (req, res) => {
+  if (!req.session.admin) return res.redirect('/admin');
+  db.run('DELETE FROM submissions', () =>
+    res.redirect('/admin/dashboard')
+  );
+});
+
 // ================= START =================
 app.listen(PORT, () => {
-  console.log('🧧 Server chạy tại http://localhost:' + PORT);
+  console.log('🧧 Server chạy tại port ' + PORT);
 });
