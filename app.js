@@ -177,10 +177,11 @@ ${baseCSS}
 </head>
 <body>
 <div class="box">
-<h2>🧧 Cảm ơn ${name} đã gửi số 🧧</h2>
+<h2>🧧 Cảm ơn <br>
+${name} đã gửi số con số may mắn 🧧</h2>
 
 <p style="text-align:center">
-🎁 Bao lì xì 🎁<br><br>
+🎁 Bao lì xì đã được gửi đi 🎁<br><br>
 🌸 Chúc Bạn Năm Mới 🌸<br>
 🌼🌺 An Khang – Thịnh Vượng – Cát Tường 🌺🌼
 </p>
