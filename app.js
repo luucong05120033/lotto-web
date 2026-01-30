@@ -3,16 +3,27 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const session = require('express-session');
 const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// ================= MIDDLEWARE =================
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(session({
+  secret: 'tet-lucky',
+  resave: false,
+  saveUninitialized: true
+}));
 
 // ================= ADMIN =================
 const ADMIN_USER = 'admin';
 const ADMIN_PASS = '123456';
 
-// ================= DATABASE (Render OK) =================
-const db = new sqlite3.Database('/tmp/data.db');
+// ================= DATABASE =================
+const db = new sqlite3.Database(
+  path.join(__dirname, 'data.db')
+);
 
 db.serialize(() => {
   db.run(`
@@ -32,14 +43,6 @@ db.serialize(() => {
 
   db.run(`INSERT OR IGNORE INTO settings VALUES ('lock','0')`);
 });
-
-// ================= MIDDLEWARE =================
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(session({
-  secret: 'tet-lucky',
-  resave: false,
-  saveUninitialized: true
-}));
 
 // ================= HELPER =================
 function isLocked(cb) {
@@ -177,10 +180,10 @@ ${baseCSS}
 </head>
 <body>
 <div class="box">
-<h2>🧧 Cảm ơn ${name} đã gửi số con số may mắn 🧧</h2>
+<h2>🧧 Cảm ơn ${name} đã gửi đi con số may mắn 🧧</h2>
 
 <p style="text-align:center">
-🎁 Bao lì xì đã được gửi đi 🎁<br><br>
+🎁 Bao lì xì may mắn đã được gửi đi 🎁<br><br>
 🌸 Chúc Bạn Năm Mới 🌸<br>
 🌼🌺 An Khang – Thịnh Vượng – Cát Tường 🌺🌼
 </p>
@@ -227,7 +230,9 @@ app.get('/admin/dashboard', (req, res) => {
 
   const q = req.query.q || '';
   db.all(
-    `SELECT * FROM submissions WHERE name LIKE ? OR number LIKE ? ORDER BY number ASC`,
+    `SELECT * FROM submissions 
+     WHERE name LIKE ? OR CAST(number AS TEXT) LIKE ?
+     ORDER BY number ASC`,
     [`%${q}%`, `%${q}%`],
     (e, rows) => {
       isLocked(locked => {
