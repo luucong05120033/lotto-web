@@ -140,8 +140,8 @@ Vui lòng chờ BTC công bố kết quả 🎊
 <b>Tên của bạn</b>
 <input name="name" required>
 
-<b>Số bạn chọn (1–40)</b>
-<input type="number" name="number" min="1" max="40" required>
+<b>Số bạn chọn (1–60)</b>
+<input type="number" name="number" min="1" max="60" required>
 
 <button>🎉 GỬI SỐ MAY MẮN</button>
 </form>
@@ -180,10 +180,10 @@ ${baseCSS}
 </head>
 <body>
 <div class="box">
-<h2>🧧 Cảm ơn ${name} đã gửi đi con số may mắn 🧧</h2>
+<h2>🧧 Cảm ơn ${name} đã gửi con số may mắn 🧧</h2>
 
 <p style="text-align:center">
-🎁 Bao lì xì may mắn đã được gửi đi 🎁<br><br>
+🎁 Bao lì xì đã được gửi 🎁<br><br>
 🌸 Chúc Bạn Năm Mới 🌸<br>
 🌼🌺 An Khang – Thịnh Vượng – Cát Tường 🌺🌼
 </p>
