@@ -145,7 +145,7 @@ Vui lòng chờ BTC công bố kết quả 🎊
 `}
 
 <p style="text-align:center;margin-top:15px">
-🍀 Số <b>nhỏ nhất & duy nhất</b> sẽ trúng lộc 🍀
+🍀Nếu số bạn chọn là <b>duy nhất</b> sẽ trúng lộc 🍀
 </p>
 </div>
 </body></html>
